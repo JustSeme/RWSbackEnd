@@ -1,11 +1,11 @@
 import express from 'express'
 
-const app = express()
+export const app = express()
 const port = 3000
 const jsonBodyMiddleWare = express.json()
 app.use(jsonBodyMiddleWare)
 
-const HTTP_STATUSES = {
+export const HTTP_STATUSES = {
     OK_200: 200,
     CREATED_201: 201,
     NO_CONTENT_204: 204,
@@ -30,6 +30,7 @@ app.get('/courses', (req, res) => {
 
     res.json(foundCourses)
 })
+
 app.get('/courses/:id', (req, res) => {
     const foundCourses = db.courses.find(course => course.id === +req.params.id)
 
@@ -40,6 +41,7 @@ app.get('/courses/:id', (req, res) => {
 
     res.json(foundCourses)
 })
+
 app.post('/courses', (req, res) => {
     if(req.body.title.length < 3) {
         res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
@@ -55,6 +57,7 @@ app.post('/courses', (req, res) => {
     res.status(HTTP_STATUSES.CREATED_201)
         .json(createdCourse)
 })
+
 app.delete('/courses/:id', (req, res) => {
     let dbLength = db.courses.length
     db.courses = db.courses.filter(course => course.id !== +req.params.id)
@@ -82,6 +85,11 @@ app.put('/courses/:id', (req, res) => {
     foundCourses.title = req.body.title
 
     res.json(foundCourses)
+})
+
+app.delete('/courses', (req, res) => {
+    db.courses = []
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
 })
 
 app.listen(port, () => {
