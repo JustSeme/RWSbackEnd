@@ -1,5 +1,7 @@
 import request from 'supertest'
 import { app, HTTP_STATUSES } from '../../src'
+import { CreateCourseModel } from '../../src/models/CreateCourseModel'
+import { UpdateCourseModel } from '../../src/models/UpdateCourseModel'
 
 describe('/course', () => {
     beforeAll(async () => {
@@ -20,9 +22,10 @@ describe('/course', () => {
     })
 
     it('shouldn\'nt create course with incorrect input data', async () => {
+        const data: CreateCourseModel = { title: 'ab' }
         await request(app)
             .post('/courses')
-            .send({ title: 'ab' })
+            .send(data)
             .expect(HTTP_STATUSES.BAD_REQUEST_400)
 
         await request(app)
@@ -32,16 +35,17 @@ describe('/course', () => {
 
     let createdCourse: any = null
     it('should create course with correct input data', async () => {
+        const data: CreateCourseModel = { title: 'Hello world course' }
         const createResponse = await request(app)
             .post('/courses')
-            .send({ title: 'Hello world course' })
+            .send(data)
             .expect(HTTP_STATUSES.CREATED_201)
 
         createdCourse = createResponse.body
 
         expect(createdCourse).toEqual({
             id: expect.any(Number),
-            title: 'Hello world course'
+            title: data.title
         })
 
         await request(app)
@@ -51,16 +55,17 @@ describe('/course', () => {
 
     let createdCourse2: any = null
     it('should create one more course', async () => {
+        const data: CreateCourseModel = { title: 'Hello world course 2' }
         const createResponse = await request(app)
             .post('/courses')
-            .send({ title: 'Hello world course 2' })
+            .send(data)
             .expect(HTTP_STATUSES.CREATED_201)
 
         createdCourse2 = createResponse.body
 
         expect(createdCourse2).toEqual({
             id: expect.any(Number),
-            title: 'Hello world course 2'
+            title: data.title
         })
 
         await request(app)
@@ -69,9 +74,10 @@ describe('/course', () => {
     })
 
     it('should\'nt update course width incorrect input data', async () => {
+        const data: UpdateCourseModel = { title: 'ab' }
         await request(app)
             .put('/courses/' + createdCourse.id)
-            .send({ title: 'ab' })
+            .send(data)
             .expect(HTTP_STATUSES.BAD_REQUEST_400)
 
         await request(app)
@@ -80,26 +86,28 @@ describe('/course', () => {
     })
 
     it('should\'nt update course that not exist', async () => {
+        const data: UpdateCourseModel = { title: 'good title' }
         await request(app)
             .put('/courses/' + -100)
-            .send({ title: 'good title' })
+            .send(data)
             .expect(HTTP_STATUSES.NOT_FOUND_404)
     })
 
-    it('should update course width correct input data', async () => {
+    it('should update course with correct input data', async () => {
+        const data: UpdateCourseModel = { title: 'Hello world' }
         await request(app)
             .put('/courses/' + createdCourse.id)
-            .send({ title: 'Hello world' })
+            .send(data)
             .expect(HTTP_STATUSES.OK_200, {
                 ...createdCourse,
-                title: 'Hello world'
+                title: data.title
             })
 
         await request(app)
             .get('/courses/' + createdCourse.id)
             .expect(HTTP_STATUSES.OK_200, {
                 ...createdCourse,
-                title: 'Hello world'
+                title: data.title
             })
 
         await request(app)
